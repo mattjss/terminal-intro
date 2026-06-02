@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>portfolio intro</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@300;400&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      width: 100%; height: 100%;
+      background: #fafafa;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Geist Mono', 'Menlo', monospace;
+    }
+
+    #intro {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 0;
+    }
+
+    .ln {
+      font-size: 11px;
+      line-height: 2.1;
+      letter-spacing: 0.01em;
+    }
+
+    .ln-name     { color: #1a1a1a; font-weight: 400; }
+    .ln-location { color: #1a1a1a; font-weight: 400; }
+    .ln-tagline  { color: rgba(0,0,0,0.38); font-weight: 300; max-width: 296px; }
+
+    .cursor {
+      display: inline-block;
+      width: 5px; height: 11px;
+      background: #1a1a1a;
+      vertical-align: text-bottom;
+      margin-left: 1px;
+      animation: blink 1s step-end infinite;
+    }
+
+    @keyframes blink {
+      0%,  49% { opacity: 1; }
+      50%, 100% { opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div id="intro">
+    <div class="ln ln-name"     id="l1"></div>
+    <div class="ln ln-location" id="l2"></div>
+    <div class="ln ln-tagline"  id="l3"></div>
+  </div>
+
+<script>
+  const LINES = [
+    { el: document.getElementById('l1'), text: 'Matt Silverman' },
+    { el: document.getElementById('l2'), text: 'Based in San Diego, California' },
+    { el: document.getElementById('l3'), text: 'AI-native product designer with focus on strategy, craft, and code.' },
+  ];
+
+  const cursor = document.createElement('span');
+  cursor.className = 'cursor';
+
+  function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+  async function typeLine(el, text) {
+    const textNode = document.createTextNode('');
+    el.appendChild(textNode);
+    el.appendChild(cursor);
+    for (const ch of text) {
+      textNode.textContent += ch;
+      await sleep(36 + Math.random() * 30);
+    }
+  }
+
+  async function run() {
+    await sleep(420);
+    for (let i = 0; i < LINES.length; i++) {
+      await typeLine(LINES[i].el, LINES[i].text);
+      if (i < LINES.length - 1) await sleep(220);
+    }
+  }
+
+  run();
+</script>
+</body>
+</html>
