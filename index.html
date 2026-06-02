@@ -63,7 +63,7 @@
   const LINES = [
     { el: document.getElementById('l1'), text: 'Matt Silverman' },
     { el: document.getElementById('l2'), text: 'Based in San Diego, California' },
-    { el: document.getElementById('l3'), text: 'AI-native product designer with focus on strategy, craft, and code.' },
+    { el: document.getElementById('l3'), text: 'AI-native product designer with focus on\nstrategy, craft, and code.' },
   ];
 
   const cursor = document.createElement('span');
@@ -72,11 +72,17 @@
   function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
   async function typeLine(el, text) {
-    const textNode = document.createTextNode('');
+    let textNode = document.createTextNode('');
     el.appendChild(textNode);
     el.appendChild(cursor);
     for (const ch of text) {
-      textNode.textContent += ch;
+      if (ch === '\n') {
+        el.insertBefore(document.createElement('br'), cursor);
+        textNode = document.createTextNode('');
+        el.insertBefore(textNode, cursor);
+      } else {
+        textNode.textContent += ch;
+      }
       await sleep(36 + Math.random() * 30);
     }
   }
