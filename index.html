@@ -74,6 +74,82 @@
   const cursor = document.createElement('span');
   cursor.className = 'cursor';
 
+  let actx = null;
+  const ac = () => {
+    if (!actx) actx = new (window.AudioContext || window.webkitAudioContext)();
+    return actx;
+  };
+
+  function mkNoise(c, dur) {
+    const n = Math.ceil(c.sampleRate * dur);
+    const buf = c.createBuffer(1, n, c.sampleRate);
+    const d = buf.getChannelData(0);
+    for (let i = 0; i < n; i++) d[i] = Math.random() * 2 - 1;
+    const src = c.createBufferSource(); src.buffer = buf; return src;
+  }
+
+  function keyClick() {
+    try {
+      const c = ac(), t = c.currentTime;
+      const noise = mkNoise(c, 0.005);
+      const ng = c.createGain();
+      ng.gain.setValueAtTime(0.14, t); ng.gain.exponentialRampToValueAtTime(0.0001, t + 0.006);
+      noise.connect(ng); ng.connect(c.destination);
+      noise.start(); noise.stop(t + 0.007);
+      const osc = c.createOscillator(), og = c.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(300 + Math.random() * 60, t);
+      osc.frequency.exponentialRampToValueAtTime(80, t + 0.04);
+      osc.connect(og); og.connect(c.destination);
+      og.gain.setValueAtTime(0.055, t); og.gain.exponentialRampToValueAtTime(0.0001, t + 0.045);
+      osc.start(); osc.stop(t + 0.05);
+    } catch (_) {}
+  }
+
+  function enterClick() {
+    try {
+      const c = ac(), t = c.currentTime;
+      const noise = mkNoise(c, 0.008);
+      const ng = c.createGain();
+      ng.gain.setValueAtTime(0.22, t); ng.gain.exponentialRampToValueAtTime(0.0001, t + 0.01);
+      noise.connect(ng); ng.connect(c.destination);
+      noise.start(); noise.stop(t + 0.012);
+      const osc = c.createOscillator(), og = c.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(220, t);
+      osc.frequency.exponentialRampToValueAtTime(60, t + 0.055);
+      osc.connect(og); og.connect(c.destination);
+      og.gain.setValueAtTime(0.08, t); og.gain.exponentialRampToValueAtTime(0.0001, t + 0.06);
+      osc.start(); osc.stop(t + 0.065);
+    } catch (_) {}
+  }
+
+  function blip() {
+    try {
+      const c = ac(), t = c.currentTime;
+      const noise = mkNoise(c, 0.004);
+      const ng = c.createGain();
+      ng.gain.setValueAtTime(0.05, t); ng.gain.exponentialRampToValueAtTime(0.0001, t + 0.005);
+      noise.connect(ng); ng.connect(c.destination);
+      noise.start(); noise.stop(t + 0.006);
+    } catch (_) {}
+  }
+
+  function successChime() {
+    try {
+      const c = ac();
+      [[880, 0, 0.12, 0.15], [1108, 0.18, 0.10, 0.18]].forEach(([hz, delay, vol, decay]) => {
+        const osc = c.createOscillator(), g = c.createGain();
+        osc.type = 'sine'; osc.frequency.value = hz;
+        osc.connect(g); g.connect(c.destination);
+        const t = c.currentTime + delay;
+        g.gain.setValueAtTime(vol, t);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + decay);
+        osc.start(t); osc.stop(t + decay + 0.01);
+      });
+    } catch (_) {}
+  }
+
   function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
   async function typeLine(el, text) {
@@ -87,6 +163,7 @@
         el.insertBefore(textNode, cursor);
       } else {
         textNode.textContent += ch;
+        keyClick();
       }
       await sleep(36 + Math.random() * 30);
     }
@@ -96,9 +173,17 @@
     await sleep(420);
     for (let i = 0; i < LINES.length; i++) {
       await typeLine(LINES[i].el, LINES[i].text);
-      if (i < LINES.length - 1) await sleep(220);
+      if (i < LINES.length - 1) {
+        enterClick();
+        await sleep(220);
+      }
     }
+    successChime();
   }
+
+  ['click', 'keydown', 'touchstart'].forEach(e =>
+    document.addEventListener(e, () => ac(), { once: true, passive: true })
+  );
 
   run();
 </script>
